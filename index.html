@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>touching is good</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        overflow: hidden;
+      }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.2/p5.min.js"></script>
+  </head>
+  <body>
+    <script>
+      let images = [];
+      let currentImage = 0;
+      let button;
+      const buttonWidth = 100;
+      const buttonHeight = 50;
+      let clickPositions = [];
+      let emojis = ["🫦", "👄", "👉👈", "👉 💞 👈 "];
+
+      function preload() {
+        images[0] = loadImage("01.png");
+        images[1] = loadImage("02.png");
+        images[2] = loadImage("03.png");
+        images[3] = loadImage("04.png");
+        images[4] = loadImage("05.png");
+        images[5] = loadImage("06.png");
+      }
+      function setup() {
+        createCanvas(windowWidth, windowHeight);
+        button = createButton("touch");
+        button.mouseOver(moveButton);
+        textSize(40);
+        textAlign(CENTER, CENTER);
+        fill(255);
+      }
+      function draw() {
+        background(220);
+        if (images[currentImage]) {
+          drawImageCover(images[currentImage]);
+        }
+        for (let pos of clickPositions) {
+          text(pos.emoji, pos.x, pos.y);
+        }
+      }
+      function drawImageCover(img) {
+        let imgRatio = img.width / img.height;
+        let canvasRatio = width / height;
+        let drawW, drawH;
+        if (canvasRatio > imgRatio) {
+          drawW = width;
+          drawH = width / imgRatio;
+        } else {
+          drawH = height;
+          drawW = height * imgRatio;
+        }
+        let x = (width - drawW) / 2;
+        let y = (height - drawH) / 2;
+        image(img, x, y, drawW, drawH);
+      }
+      function moveButton() {
+        const x = random(width - buttonWidth);
+        const y = random(height - buttonHeight);
+        button.size(buttonWidth, buttonHeight);
+        button.position(x, y);
+      }
+      function mousePressed() {
+        currentImage = (currentImage + 1) % images.length;
+        let e = random(emojis);
+        clickPositions.push({ x: mouseX, y: mouseY, emoji: e });
+      }
+      function windowResized() {
+        resizeCanvas(windowWidth, windowHeight);
+      }
+      function keyPressed() {
+        if (key === 's') {
+          saveCanvas('imagen-' + currentImage, 'png');
+        }
+        if (key === 'a') {
+          for (let i = 0; i < images.length; i++) {
+            setTimeout(() => {
+              clear();
+              drawImageCover(images[i]);
+              saveCanvas('imagen-' + i, 'png');
+            }, i * 800);
+          }
+        }
+      }
+    </script>
+  </body>
+</html>
