@@ -1,30 +1,93 @@
+```html
 <!DOCTYPE html>
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>touching is good</title>
+
     <style>
       * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
       }
+
       body {
         overflow: hidden;
+        cursor: none;
+      }
+
+      .hand {
+        position: fixed;
+        width: 32px;
+        height: 32px;
+        pointer-events: none;
+        z-index: 9999;
+        transform: translate(-50%, -50%);
+        opacity: 1;
+        transition: opacity 0.8s ease;
+      }
+
+      .hand.fade {
+        opacity: 0;
       }
     </style>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.2/p5.min.js"></script>
   </head>
+
   <body>
+
+
+    <div id="cursorHand" class="hand">
+      <svg
+        viewBox="0 0 64 64"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M20 29
+             L20 14
+             C20 11 22 9 25 9
+             C28 9 30 11 30 14
+             L30 28
+             L30 9
+             C30 6 32 4 35 4
+             C38 4 40 6 40 9
+             L40 28
+             L40 12
+             C40 9 42 7 45 7
+             C48 7 50 9 50 12
+             L50 31
+             C50 26 53 23 56 24
+             C59 25 60 28 59 32
+             L56 43
+             C54 51 47 56 39 56
+             L30 56
+             C23 56 18 53 14 48
+             L7 39
+             C5 36 6 33 8 31
+             C10 29 13 29 15 31
+             L20 36
+             Z"
+          fill="white"
+          stroke="black"
+          stroke-width="2"
+          stroke-linejoin="round"
+        />
+      </svg>
+    </div>
+
     <script>
       let images = [];
       let currentImage = 0;
       let button;
+
       const buttonWidth = 100;
       const buttonHeight = 50;
-      let clickPositions = [];
-      let emojis = ["👆", "👉👈","👉", "👈", "👐", "🫱"];
+
+      let lastTrailX = 0;
+      let lastTrailY = 0;
 
       function preload() {
         images[0] = loadImage("01.png");
@@ -34,27 +97,48 @@
         images[4] = loadImage("05.png");
         images[5] = loadImage("06.png");
       }
+
       function setup() {
         createCanvas(windowWidth, windowHeight);
+
         button = createButton("touch");
         button.mouseOver(moveButton);
-        textSize(40);
-        textAlign(CENTER, CENTER);
-        fill(255);
+
+        positionCursorHand(mouseX, mouseY);
       }
+
       function draw() {
         background(220);
+
         if (images[currentImage]) {
           drawImageCover(images[currentImage]);
         }
-        for (let pos of clickPositions) {
-          text(pos.emoji, pos.x, pos.y);
+
+    
+        let distance = dist(
+          mouseX,
+          mouseY,
+          lastTrailX,
+          lastTrailY
+        );
+
+        if (distance > 18) {
+          createTrailHand(mouseX, mouseY);
+
+          lastTrailX = mouseX;
+          lastTrailY = mouseY;
         }
+
+ 
+        positionCursorHand(mouseX, mouseY);
       }
+
       function drawImageCover(img) {
         let imgRatio = img.width / img.height;
         let canvasRatio = width / height;
+
         let drawW, drawH;
+
         if (canvasRatio > imgRatio) {
           drawW = width;
           drawH = width / imgRatio;
@@ -62,34 +146,105 @@
           drawH = height;
           drawW = height * imgRatio;
         }
+
         let x = (width - drawW) / 2;
         let y = (height - drawH) / 2;
+
         image(img, x, y, drawW, drawH);
       }
+
       function moveButton() {
         const x = random(width - buttonWidth);
         const y = random(height - buttonHeight);
+
         button.size(buttonWidth, buttonHeight);
         button.position(x, y);
       }
+
       function mousePressed() {
         currentImage = (currentImage + 1) % images.length;
-        let e = random(emojis);
-        clickPositions.push({ x: mouseX, y: mouseY, emoji: e });
       }
+
+      function positionCursorHand(x, y) {
+        const hand = document.getElementById("cursorHand");
+
+        hand.style.left = x + "px";
+        hand.style.top = y + "px";
+      }
+
+      function createTrailHand(x, y) {
+        const hand = document.createElement("div");
+
+        hand.className = "hand";
+
+        hand.innerHTML = `
+          <svg
+            viewBox="0 0 64 64"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M20 29
+                 L20 14
+                 C20 11 22 9 25 9
+                 C28 9 30 11 30 14
+                 L30 28
+                 L30 9
+                 C30 6 32 4 35 4
+                 C38 4 40 6 40 9
+                 L40 28
+                 L40 12
+                 C40 9 42 7 45 7
+                 C48 7 50 9 50 12
+                 L50 31
+                 C50 26 53 23 56 24
+                 C59 25 60 28 59 32
+                 L56 43
+                 C54 51 47 56 39 56
+                 L30 56
+                 C23 56 18 53 14 48
+                 L7 39
+                 C5 36 6 33 8 31
+                 C10 29 13 29 15 31
+                 L20 36
+                 Z"
+              fill="white"
+              stroke="black"
+              stroke-width="2"
+              stroke-linejoin="round"
+            />
+          </svg>
+        `;
+
+        hand.style.left = x + "px";
+        hand.style.top = y + "px";
+
+        document.body.appendChild(hand);
+
+  
+        setTimeout(() => {
+          hand.classList.add("fade");
+
+          setTimeout(() => {
+            hand.remove();
+          }, 800);
+        }, 300);
+      }
+
       function windowResized() {
         resizeCanvas(windowWidth, windowHeight);
       }
+
       function keyPressed() {
-        if (key === 's') {
-          saveCanvas('imagen-' + currentImage, 'png');
+        if (key === "s") {
+          saveCanvas("imagen-" + currentImage, "png");
         }
-        if (key === 'a') {
+
+        if (key === "a") {
           for (let i = 0; i < images.length; i++) {
             setTimeout(() => {
               clear();
               drawImageCover(images[i]);
-              saveCanvas('imagen-' + i, 'png');
+              saveCanvas("imagen-" + i, "png");
             }, i * 800);
           }
         }
@@ -97,3 +252,4 @@
     </script>
   </body>
 </html>
+```
