@@ -20,21 +20,21 @@
 
       .grab-hand {
         position: fixed;
-        pointer-events: none;
-        z-index: 9999;
-
         width: 18px;
         height: 18px;
-
+        pointer-events: none;
+        z-index: 9999;
         transform: translate(-50%, -50%);
-
-        cursor: grab;
-
-        transition: transform 0.05s linear;
       }
 
-      .grab-hand.grabbing {
-        transform: translate(-50%, -50%) scale(0.9);
+      #handLeft {
+        transform: translate(-50%, -50%) scaleX(-1);
+      }
+
+      .grab-hand svg {
+        width: 100%;
+        height: 100%;
+        display: block;
       }
     </style>
 
@@ -43,12 +43,9 @@
 
   <body>
 
-    <!-- MANO IZQUIERDA -->
+    <!-- DOS MANOS -->
     <div id="handLeft" class="grab-hand">
-      <svg
-        viewBox="0 0 64 64"
-        xmlns="http://www.w3.org/2000/svg"
-      >
+      <svg viewBox="0 0 64 64">
         <path
           d="M20 29
              L20 14
@@ -82,12 +79,8 @@
       </svg>
     </div>
 
-    <!-- MANO DERECHA -->
     <div id="handRight" class="grab-hand">
-      <svg
-        viewBox="0 0 64 64"
-        xmlns="http://www.w3.org/2000/svg"
-      >
+      <svg viewBox="0 0 64 64">
         <path
           d="M20 29
              L20 14
@@ -129,7 +122,7 @@
       const buttonWidth = 100;
       const buttonHeight = 50;
 
-      const handDistance = 12;
+      const handDistance = 11;
 
       function preload() {
         images[0] = loadImage("01.png");
@@ -169,10 +162,11 @@
       }
 
       function drawImageCover(img) {
-        let imgRatio = img.width / img.height;
-        let canvasRatio = width / height;
+        const imgRatio = img.width / img.height;
+        const canvasRatio = width / height;
 
-        let drawW, drawH;
+        let drawW;
+        let drawH;
 
         if (canvasRatio > imgRatio) {
           drawW = width;
@@ -182,8 +176,8 @@
           drawW = height * imgRatio;
         }
 
-        let x = (width - drawW) / 2;
-        let y = (height - drawH) / 2;
+        const x = (width - drawW) / 2;
+        const y = (height - drawH) / 2;
 
         image(img, x, y, drawW, drawH);
       }
@@ -198,24 +192,6 @@
 
       function mousePressed() {
         currentImage = (currentImage + 1) % images.length;
-
-        document
-          .getElementById("handLeft")
-          .classList.add("grabbing");
-
-        document
-          .getElementById("handRight")
-          .classList.add("grabbing");
-      }
-
-      function mouseReleased() {
-        document
-          .getElementById("handLeft")
-          .classList.remove("grabbing");
-
-        document
-          .getElementById("handRight")
-          .classList.remove("grabbing");
       }
 
       function windowResized() {
